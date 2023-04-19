@@ -1,0 +1,56 @@
+{% extends 'flatpages/default.html' %}
+
+{% load custom_tags %}
+
+{% block title %}
+Comment_list
+{% endblock title %}
+
+<!-- В контенте на странице мы выводим отклики по поиску -->
+{% block content %}
+<h2>Список принятых откликов на объявление</h2>
+<p>Уникальный номер объявления: {{ post_id }}</p>
+<p>Текст объявления: {{ post_commented }}</p>
+<hr>
+
+{% if comment_list %}
+    <table>
+        <tr>
+            <td>Дата отклика</td>
+            <td>Выдержка из текста (20 символов)</td>
+        </tr>
+            {% for i_comment in comment_list %}
+                <tr>
+                    <td>{{ i_comment.dateCreation|date:'d.m.y' }}</td>
+                    <td>{{ i_comment.text|truncatechars:20 }}</td>
+                </tr>
+            {% endfor %}
+    </table>
+{% else %}
+    <h3>Принятых откликов на данное объявление пока что нет!</h3>
+{% endif %}
+
+{# Добавляем пагинацию на страницу #}
+
+   {# Информация о предыдущих страницах #}
+   {% if page_obj.has_previous %}
+       <a href="?{% url_replace page=1 %}">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {# Информация о текущей странице #}
+   {{ page_obj.number }}
+
+   {# Информация о следующих страницах #}
+   {% if page_obj.has_next %}
+       <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
+{% endblock content %}

@@ -1,0 +1,17 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+<h2>Редактируем объявление</h2>
+<hr>
+<p>Уникальный номер: {{ post.id }}</p>
+<p>Заголовок: {{ post.title }}</p>
+<p>Категория: {{ post.category_news }}</p>
+<p>Текст: {{ post.text }}</p>
+<p>Файл: {{ post.upload }}</p>
+<hr>
+<form action="" method = 'post' enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Save" />
+</form>
+{% endblock content %}

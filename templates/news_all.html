@@ -1,0 +1,104 @@
+{% extends 'flatpages/default.html' %}
+
+<!-- подключаем свой тег для пагинации -->
+{% load custom_tags %}
+
+<!-- Название у нас будет news -->
+{% block title %}
+News
+{% endblock title %}
+
+{% block content %}
+    <h2>Все объявления</h2>
+
+    <hr>
+    {% if perms.news.add_post and user.code.user_status %}
+        <a href="{% url 'news_create' %}">Добавить объявление</a>
+    {% else %}
+        {% if perms.news.add_post and not user.code.user_status %}
+            <a href="{% url 'confirm' pk=user.code.id %}">Подтвердить регистрацию кодом</a>
+        {% else %}
+            <a href='/accounts/login'>Зарегистрироваться</a>
+        {% endif %}
+    {% endif %}
+
+    {% if news %}
+        <h3>Количество объявлений на странице:{{ news|length }}</h3>
+        <hr>
+        <table>
+            <tr>
+                <td>Заголовок</td>
+                <td>Дата публикации</td>
+                <td>Выдержка из текста (20 символов)</td>
+                <td>Категория</td>
+                <td>Автор</td>
+                {% if perms.news.change_post or perms.news.delete_post %}
+                    <td>Действия</td>
+                {% endif %}
+            </tr>
+
+            {% for i_news in news %}
+            <tr>
+                <td><a href="{% url 'news_id' pk=i_news.id %}">{{ i_news.title }} </a></td>
+                <td>{{ i_news.time|date:'d.m.y' }}</td>
+                <td>{{ i_news.text|truncatechars:20 }}</td>
+                <td>{{ i_news.category_news }}</td>
+                <td>{{ i_news.author }}</td>
+
+                <td>
+               {# Доступ для каждой ссылки будем проверять отдельно #}
+                        {% if perms.news.change_post and i_news.author == user.author %}
+                            {% if user.code.user_status %}
+                                <a href="{% url 'news_edit' pk=i_news.id %}">Изменить объявление</a>
+                            {% else %}
+                                <a href="{% url 'confirm' pk=user.code.id %}">Подтвердить регистрацию кодом</a>
+                            {% endif %}
+                        {% endif %}
+
+                    {% if perms.news.delete_post and i_news.author == user.author %}
+                        {% if user.code.user_status %}
+                            <a href="{% url 'news_delete' pk=i_news.id %}">Удалить объявление</a>
+                        {% else %}
+                            <a href="{% url 'confirm' pk=user.code.id %}">Подтвердить регистрацию кодом</a>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if perms.news.add_comment and i_news.author != user.author %}
+                        {% if user.code.user_status %}
+                            <a href="{% url 'comment_create' pk=i_news.id %}">Добавить отклик</a>
+                        {% else %}
+                            <a href="{% url 'confirm' pk=user.code.id %}">Подтвердить регистрацию кодом</a>
+                        {% endif %}
+                    {% endif %}
+               </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h2>Объявлений нет!</h2>
+    {% endif %}
+
+{# Добавляем пагинацию на страницу #}
+
+   {# Информация о предыдущих страницах #}
+   {% if page_obj.has_previous %}
+       <a href="?{% url_replace page=1 %}">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {# Информация о текущей странице #}
+   {{ page_obj.number }}
+
+   {# Информация о следующих страницах #}
+   {% if page_obj.has_next %}
+       <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
+{% endblock content %}

@@ -1,0 +1,18 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+<h2>Подтверждение регистрации кодом</h2>
+<hr>
+<p>Пользователь: {{ code.user }}</p>
+<hr>
+{% if not code.status %}
+    <form action="" method = 'post' enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save" />
+    </form>
+{% else %}
+    <h2>Действия не требуются, правильный код введён.</h2>
+{% endif %}
+
+{% endblock content %}

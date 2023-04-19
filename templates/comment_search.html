@@ -1,0 +1,82 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+
+{% load custom_tags %}
+
+{% block title %}
+Comment_search
+{% endblock title %}
+
+<!-- В контенте на странице мы выводим отклики по поиску -->
+{% block content %}
+    <h2>Приватная страница пользователя {{ user }}</h2>
+    <h3>Поиск по всем откликам на объявления {{ user }}</h3>
+    <hr>
+
+    {# Добавляем форму, которая объединяет набор полей, которые будут отправляться в запросе #}
+    <form action="" method="get">
+        {# Переменная, которую мы передали через контекст, может сгенерировать нам форму с полями #}
+        {{ filterset.form.as_p }}
+
+        {# Добавим кнопку отправки данных формы #}
+        <input type="submit" value="Найти" />
+    </form>
+
+    {% if comment_search %}
+<!--        <h3>Количество найденных по фильтру откликов: {{ news_search|length }}</h3>-->
+        <hr>
+        <table>
+            <tr>
+                <td>Дата отклика</td>
+                <td>Выдержка из текста (20 символов)</td>
+                <td>Действия</td>
+
+            </tr>
+            {% for i_comment in comment_search %}
+            <tr>
+                <td>{{ i_comment.dateCreation|date:'d.m.y' }}</td>
+                <td>{{ i_comment.text|truncatechars:20 }}</td>
+                <td>{% if not i_comment.status %}
+                        {% if user.code.user_status %}
+                            <a href="{% url 'comment_accept' pk=i_comment.id %}">Принять отклик</a>
+                        {% else %}
+                            <a href="{% url 'confirm' pk=user.code.id %}">Подтвердить регистрацию кодом</a>
+                        {% endif %}
+
+                        {% if user.code.user_status %}
+                            <a href="{% url 'comment_delete' pk=i_comment.id %}">Удалить отклик</a>
+                        {% else %}
+                            <a href="{% url 'confirm' pk=user.code.id %}">Подтвердить регистрацию кодом</a>
+                        {% endif %}
+                    {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h3>Откликов по заданным параметрам поиска нет!</h3>
+    {% endif %}
+
+{# Добавляем пагинацию на страницу #}
+
+   {# Информация о предыдущих страницах #}
+   {% if page_obj.has_previous %}
+       <a href="?{% url_replace page=1 %}">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {# Информация о текущей странице #}
+   {{ page_obj.number }}
+
+   {# Информация о следующих страницах #}
+   {% if page_obj.has_next %}
+       <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
+{% endblock content %}

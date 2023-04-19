@@ -1,0 +1,23 @@
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+News_id
+{% endblock title %}
+
+<!-- В контенте на странице мы выводим объявление, идентификатор которого был передан в url -->
+{% block content %}
+    <table>
+        <tr>
+            <td>Заголовок</td>
+            <td>Дата</td>
+            <td>Полный текст</td>
+        </tr>
+        <tr>
+            <td>{{ news_id|title }}</td>
+            <td>{{ news_id.time|date:'d.m.y' }}</td>
+            <td>{{ news_id.text }}</td>
+        </tr>
+    </table>
+    <a href="{% url 'comment_list' pk=news_id.id %}">Посмотреть отклики</a>
+
+{% endblock content %}
